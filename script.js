@@ -1,92 +1,187 @@
+// ========================================
+// POCKETSMART AI
+// REGISTER + LOGIN
+// ========================================
+
+
+// ========================================
 // REGISTER
+// ========================================
+
 const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
-    registerForm.addEventListener("submit", function (e) {
-        e.preventDefault();
 
-        const name = document.getElementById("name").value.trim();
-        const email = document.getElementById("email").value.trim().toLowerCase();
-        const password = document.getElementById("password").value;
+    registerForm.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        // Get values
+        const name = document
+            .getElementById("registerName")
+            .value
+            .trim();
+
+        const email = document
+            .getElementById("registerEmail")
+            .value
+            .trim()
+            .toLowerCase();
+
+        const password = document
+            .getElementById("registerPassword")
+            .value;
 
         const message = document.getElementById("registerMessage");
 
-        // Check existing user
-        const existingUser = localStorage.getItem("pocketsmart_user");
+
+        // Get existing users
+        let users = JSON.parse(
+            localStorage.getItem("pocketsmart_users")
+        ) || [];
+
+
+        // Check email already exists
+        const existingUser = users.find(function (user) {
+
+            return user.email === email;
+
+        });
+
 
         if (existingUser) {
-            const user = JSON.parse(existingUser);
 
-            if (user.email === email) {
-                message.textContent = "Email already registered. Please login.";
-                message.style.color = "red";
-                return;
-            }
+            message.textContent =
+                "Email already registered. Please login.";
+
+            message.className = "error-message";
+
+            return;
         }
 
-        // Save user
-        const user = {
+
+        // Create new user
+        const newUser = {
+
             name: name,
             email: email,
             password: password
+
         };
 
-        localStorage.setItem("pocketsmart_user", JSON.stringify(user));
 
-        message.textContent = "Account created successfully!";
-        message.style.color = "green";
+        // Add user
+        users.push(newUser);
 
-        // Go to login
-        setTimeout(() => {
+
+        // Save users
+        localStorage.setItem(
+            "pocketsmart_users",
+            JSON.stringify(users)
+        );
+
+
+        // Success message
+        message.textContent =
+            "Account created successfully!";
+
+        message.className = "success-message";
+
+
+        // Go to login page
+        setTimeout(function () {
+
             window.location.href = "login.html";
+
         }, 1000);
+
     });
 }
 
 
+
+// ========================================
 // LOGIN
+// ========================================
+
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
-    loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
 
+    loginForm.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+
+        // Get values
         const email = document
             .getElementById("loginEmail")
             .value
             .trim()
             .toLowerCase();
 
-        const password = document.getElementById("loginPassword").value;
+        const password = document
+            .getElementById("loginPassword")
+            .value;
 
-        const message = document.getElementById("loginMessage");
+        const message =
+            document.getElementById("loginMessage");
 
-        // Get registered user
-        const savedUser = localStorage.getItem("pocketsmart_user");
 
-        if (!savedUser) {
-            message.textContent = "No account found. Please register first.";
-            message.style.color = "red";
+        // Get registered users
+        const users = JSON.parse(
+            localStorage.getItem("pocketsmart_users")
+        ) || [];
+
+
+        // Find user
+        const user = users.find(function (user) {
+
+            return (
+                user.email === email &&
+                user.password === password
+            );
+
+        });
+
+
+        // User not found
+        if (!user) {
+
+            message.textContent =
+                "Invalid email or password.";
+
+            message.className = "error-message";
+
             return;
         }
 
-        const user = JSON.parse(savedUser);
 
-        // Check login
-        if (user.email === email && user.password === password) {
+        // Login successful
+        localStorage.setItem(
+            "pocketsmart_logged_in",
+            "true"
+        );
 
-            localStorage.setItem("pocketsmart_logged_in", "true");
 
-            message.textContent = "Login successful!";
-            message.style.color = "green";
+        localStorage.setItem(
+            "pocketsmart_current_user",
+            JSON.stringify(user)
+        );
 
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 800);
 
-        } else {
-            message.textContent = "Invalid email or password.";
-            message.style.color = "red";
-        }
+        message.textContent =
+            "Login successful!";
+
+        message.className = "success-message";
+
+
+        // Go to home page
+        setTimeout(function () {
+
+            window.location.href = "index.html";
+
+        }, 1000);
+
     });
 }
